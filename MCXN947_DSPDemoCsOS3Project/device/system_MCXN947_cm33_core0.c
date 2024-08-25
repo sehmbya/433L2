@@ -58,16 +58,12 @@
    ---------------------------------------------------------------------------- */
 
 uint32_t SystemCoreClock = DEFAULT_SYSTEM_CLOCK;
-uint32_t TestValueCMSE; //Todo: This is to test the content of __ARM_FEATURE_CMSE
-                        // This macro will not expand because it is not coming from C code.
-                        // It is coming from MCUXpresso, somewhere.
 
 /* ----------------------------------------------------------------------------
    -- SystemInit()
    ---------------------------------------------------------------------------- */
 
 __attribute__ ((weak)) void SystemInit (void) {
-	TestValueCMSE = __ARM_FEATURE_CMSE;
 #if ((__FPU_PRESENT == 1) && (__FPU_USED == 1))
   SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));    /* set CP10, CP11 Full Access in Secure mode */
   #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
