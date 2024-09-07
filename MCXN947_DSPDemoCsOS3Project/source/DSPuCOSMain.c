@@ -2,7 +2,6 @@
 * A simple DSP demo program that uses uCOS-III.
 * 04/26/16, Todd Morton
 * 03/28/2020, Todd Morton
-* 09/05/2024, Todo: OS statistics do not work with the shell running. Todd Morton
 *****************************************************************************************/
 #include "MCUType.h"
 #include "app_cfg.h"
@@ -11,6 +10,7 @@
 #include "AppDSP.h"
 #include "FRDM_MCXN947ClkCfg.h"
 #include "DSPShell.h"
+#include "os_app_hooks.h"
 /*****************************************************************************************
 * Allocate task control blocks
 *****************************************************************************************/
@@ -36,7 +36,6 @@ void main(void) {
 
     FRDM_MCXN947InitBootClock();
     OSInit(&os_err);                    /* Initialize uC/OS-III                         */
-
     OSTaskCreate((OS_TCB     *)&appTaskStartTCB,            /* Create the start task    */
                  (CPU_CHAR   *)"Start Task",
                  (OS_TASK_PTR ) appStartTask,
@@ -68,6 +67,7 @@ static void appStartTask(void *p_arg) {
     (void)p_arg;                        /* Avoid compiler warning for unused variable   */
 
     OS_CPU_SysTickInitFreq(SystemCoreClock);
+    OSStatTaskCPUUsageInit(&os_err);
     GpioDBugBitsInit();
     DSPInit();
     DSPShell_Init();

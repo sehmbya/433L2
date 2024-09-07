@@ -16,7 +16,7 @@
 * when using a ping-pong buffer, there are two blocks.
 *****************************************************************************************************/
 #define DSP_NUM_BLOCKS                  2
-#define DSP_SAMPLES_PER_BLOCK           2048
+#define DSP_SAMPLES_PER_BLOCK           256
 #define DSP_BUFFER_BYTES_PER_SAMPLE     4
 #define DSP_NUM_IN_CHANNELS             2
 #define DSP_NUM_OUT_CHANNELS            2

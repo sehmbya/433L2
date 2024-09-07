@@ -4,6 +4,8 @@
  * MCULink debug USB serial port. FRDM-MCXN947 board.
  * v1.1
  *  Created by: Todd Morton, 05/04/2024
+ *  Todo: experiment with FIFOs, measure blocking time.
+ *  Todo: move clock to pll0_div at 50MHz
  *******************************************************************************************
 * Project master header file
 ********************************************************************/
@@ -40,7 +42,7 @@ void BIOOpen(INT8U rate){
     LPUART4->GLOBAL |= LPUART_GLOBAL_RST_MASK;
     LPUART4->GLOBAL &= ~LPUART_GLOBAL_RST_MASK;
 
-    switch(rate){ //Todo: try to make this more accurate with higher clock in
+    switch(rate){
     case(BIO_BIT_RATE_9600):
         LPUART4->BAUD = LPUART_BAUD_SBR(50)|LPUART_BAUD_OSR(24);
         break;
@@ -63,7 +65,7 @@ void BIOOpen(INT8U rate){
     LPUART4->WATER = LPUART_WATER_RXWATER(0) | LPUART_WATER_TXWATER(1);
 
     /* Enable tx/rx FIFO */
-    /*Todo: experiment with FIFOs, measure blocking time.*/
+
     LPUART4->FIFO |= (LPUART_FIFO_TXFE_MASK | LPUART_FIFO_RXFE_MASK);
 
     /* Flush FIFO */

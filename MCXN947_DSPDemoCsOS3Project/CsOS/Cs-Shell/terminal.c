@@ -31,7 +31,8 @@
 */
 
 #define    TERMINAL_MODULE
-#include  "../Cs-Shell/terminal.h"
+#include "os.h"
+#include  "terminal.h"
 
 
 /*
@@ -234,6 +235,8 @@ void  Terminal_Task (void *p_arg)
 
 
     while (DEF_TRUE) {
+
+
                                                                 /* -------------------- RD NEW LINE ------------------- */
         esc_type = TerminalMode_RdLine(&cmd[0],
                                         TERMINAL_CFG_MAX_CMD_LEN,

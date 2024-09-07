@@ -4,6 +4,8 @@
 * This is an example of a data processing task that does some real-time digital
 * signal processing.
 *
+* Todo: Remove sample size magic numbers. Create settings structure and add cpu load.
+*
 * 08/28/2024 Todd Morton
 *******************************************************************************************/
 /******************************************************************************************
@@ -52,7 +54,7 @@ void DSPInit(void){
 
     OSSemCreate(&dspSuspended, "stream suspended", 0, &os_err);
     DMAInit(&dspInBuffer[0][0], &dspOutBuffer[0][0]);
-    SAIInit(32);	//Todo: replace sample size with variable/define. Create settings structure
+    SAIInit(32);
     SAI_RX_ENABLE();
     SAI_TX_ENABLE();
     CODECInit();

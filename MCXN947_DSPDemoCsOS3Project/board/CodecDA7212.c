@@ -2,8 +2,10 @@
  * CodecDA7212.c - Module for configuration and control of
  * Dialog DA7212 Codec. Initial sample rate of 48000sps and sample size of 32 bits is hard coded.
  * Requires I2C and SAI module for communication.
- * Todo: Reorg by moving defines to *.h and following fsl_dialog7212.c names. Only if it is needed
- *       to make these register names public.
+ * Todo: 1) Reorg by moving defines to *.h and following fsl_dialog7212.c names. Only if
+ *          it is needed to make these register names public.
+ *       2) Get block loading working.
+ *
  * Todd Morton, 08/29/2024
  *****************************************************************************************
 * Master Include File

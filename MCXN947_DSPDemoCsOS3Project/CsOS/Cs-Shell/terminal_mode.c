@@ -22,6 +22,7 @@
 * Filename      : terminal_mode.c
 * Version       : V1.03.01
 * Programmer(s) : BAN
+* Modifications : Added ODTimeDLY() in TerminalMode_RdLine() to keep from blocking. TDM, 09/06/2024
 *********************************************************************************************************
 * Note(s)       : (1) ECMA-48 'Control Functions for Coded Character Sets' (5th edition), standardizes
 *                     a set of terminal emulation commands.  The ISO/IEC and ANSI issued corresponding
@@ -61,8 +62,8 @@
 *                                            INCLUDE FILES
 *********************************************************************************************************
 */
-
-#include "../Cs-Shell/terminal.h"
+#include "os.h"
+#include "terminal.h"
 
 /*
 *********************************************************************************************************
@@ -209,7 +210,7 @@ static  CPU_INT08U  Terminal_VT100_EscStrRight[] = {TERMINAL_VT100_ESC_CHAR,
 *
 * Caller(s)   : Terminal_Task().
 *
-* Note(s)     : none.
+* Note(s)     : OSTimeDly() added so this is not completely blocking. TDM
 *********************************************************************************************************
 */
 
@@ -227,12 +228,15 @@ CPU_INT08U  TerminalMode_RdLine (CPU_CHAR     *pstr,
     CPU_INT08U  rtn_val;
     CPU_SIZE_T  str_len;
     CPU_SIZE_T  str_ix;
+    OS_ERR err;
 
 
     rtn_val    =  TERMINAL_ESC_TYPE_NONE;
     cursor_pos = *pcursor_pos;
 
     while (DEF_TRUE) {
+
+        OSTimeDly(100,OS_OPT_TIME_PERIODIC, &err); //Added pending call so terminal does not block
         in_char = TerminalSerial_RdByte();
 
         switch (in_char) {

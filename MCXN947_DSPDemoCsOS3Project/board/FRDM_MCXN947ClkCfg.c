@@ -6,6 +6,7 @@
  * Sets main clock to 150MHz from a 24MHz XTAL.
  *
  * 24MHZ XTAL ---> PLL ---> AHB (main) clock 150MHz
+ * Todo: Should pll_div setting go in ClkCfg? 150MHz/3 = 50MHz?
  *
  * TDM, 05/07/2024
  **********************************************************************************************************************/
