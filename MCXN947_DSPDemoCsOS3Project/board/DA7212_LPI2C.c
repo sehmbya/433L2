@@ -33,6 +33,7 @@ static INT8U i2cGetTargetAddress(void);
 *
 *  DESCRIPTION: Initializes LPI2C, on Flexcomm 2 for Controller mode,
 *               7-bit addressing, uses P4_0 and P4_1.
+*               Assumes pll0 clock at 150MHz/3 = 50MHz
 *
 *********************************************************************************/
 void I2CInit(void){
@@ -40,8 +41,6 @@ void I2CInit(void){
 	SYSCON->AHBCLKCTRLSET[0] = SYSCON_AHBCLKCTRL0_PORT4(1);
 	SYSCON->AHBCLKCTRLSET[1] = SYSCON_AHBCLKCTRL1_FC2(1);
 	//Set FC2 clock to pll0_div. 150MHz/3 = 50MHz
-	SYSCON->PLLCLKDIVSEL = SYSCON_PLLCLKDIVSEL_SEL(0);
-	SYSCON->PLLCLKDIV = SYSCON_PLLCLKDIV_DIV(2);
 	SYSCON->FCCLKSEL[2] = SYSCON_FCCLKSEL_SEL(1);			//PLL div clk, 50MHz
 	SYSCON->FLEXCOMMCLKDIV[2] = SYSCON_FLEXCOMMXCLKDIV_FLEXCOMMCLKDIV_DIV(0); //div by 1, clear HALT
 	//Configure ports and set FC2 to LPI2C

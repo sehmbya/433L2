@@ -9,6 +9,7 @@
 #include "FRDM_MCXN947_GPIO.h"
 #include "AppDSP.h"
 #include "FRDM_MCXN947ClkCfg.h"
+#include "BasicIO.h"
 #include "DSPShell.h"
 #include "os_app_hooks.h"
 /*****************************************************************************************
@@ -35,6 +36,7 @@ void main(void) {
     OS_ERR  os_err;
 
     FRDM_MCXN947InitBootClock();
+    BIOOpen(BIO_BIT_RATE_115200);	//Startup BasicIO for asserts
     OSInit(&os_err);                    /* Initialize uC/OS-III                         */
     OSTaskCreate((OS_TCB     *)&appTaskStartTCB,            /* Create the start task    */
                  (CPU_CHAR   *)"Start Task",
@@ -50,8 +52,8 @@ void main(void) {
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&os_err);
 
+    assert(!os_err);
     OSStart(&os_err);               /*Start multitasking(i.e. give control to uC/OS)    */
-
     while(1){}                 /* Should never get here                            */
     
 }
