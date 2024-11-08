@@ -4,8 +4,6 @@
  * MCULink debug USB serial port. FRDM-MCXN947 board.
  * v1.1
  *  Created by: Todd Morton, 05/04/2024
- *  Todo: experiment with FIFOs, measure blocking time.
- *  Todo: move clock to pll0_div at 50MHz
  *******************************************************************************************
 * Project master header file
 ********************************************************************/
@@ -22,6 +20,7 @@ static INT8U bioHtoB(INT8C c);
 /*******************************************************************************************
  * void BIOOpen(INT8U rate) - Initializes UART to operate at a specified rate.
  * MCU: MCXN947, LPUART4 configured for debugger USB.
+ * Clock: Assumes connection to pll_clk_div is set to pll0_clk/3 = 150MHz/3 = 50MHz
  * Acceptable rates:
  *  BIO_BIT_RATE_9600
  *  BIO_BIT_RATE_19200
@@ -32,7 +31,7 @@ static INT8U bioHtoB(INT8C c);
 void BIOOpen(INT8U rate){
 
 	SYSCON->AHBCLKCTRLSET[0] = SYSCON_AHBCLKCTRL0_PORT1(1);
-	SYSCON->FCCLKSEL[4] = SYSCON_FCCLKSEL_SEL(2); //Connect FRO12M clock to flexcomm
+	SYSCON->FCCLKSEL[4] = SYSCON_FCCLKSEL_SEL(1);			//PLL div clk, 50MHz
 	SYSCON->AHBCLKCTRLSET[1] = SYSCON_AHBCLKCTRL1_FC4(1);
 
     PORT1->PCR[8]=PORT_PCR_MUX(2)|PORT_PCR_IBE(1);    //ties P1_8 to RxD, enable buffer
@@ -42,36 +41,39 @@ void BIOOpen(INT8U rate){
     LPUART4->GLOBAL |= LPUART_GLOBAL_RST_MASK;
     LPUART4->GLOBAL &= ~LPUART_GLOBAL_RST_MASK;
 
-    switch(rate){
+    switch(rate){ //Todo: try to make this more accurate with higher clock in
     case(BIO_BIT_RATE_9600):
-        LPUART4->BAUD = LPUART_BAUD_SBR(50)|LPUART_BAUD_OSR(24);
+        LPUART4->BAUD = LPUART_BAUD_SBR(168)|LPUART_BAUD_OSR(30); //30 results in OSR of 31
         break;
     case(BIO_BIT_RATE_19200):
-		LPUART4->BAUD = LPUART_BAUD_SBR(25)|LPUART_BAUD_OSR(24);
+		LPUART4->BAUD = LPUART_BAUD_SBR(84)|LPUART_BAUD_OSR(30);
         break;
     case(BIO_BIT_RATE_38400):
-		LPUART4->BAUD = LPUART_BAUD_SBR(12)|LPUART_BAUD_OSR(25);
+		LPUART4->BAUD = LPUART_BAUD_SBR(42)|LPUART_BAUD_OSR(30);
         break;
     case(BIO_BIT_RATE_57600):
-		LPUART4->BAUD = LPUART_BAUD_SBR(8)|LPUART_BAUD_OSR(25);
+		LPUART4->BAUD = LPUART_BAUD_SBR(28)|LPUART_BAUD_OSR(30);
         break;
     case(BIO_BIT_RATE_115200):
-		LPUART4->BAUD = LPUART_BAUD_SBR(4)|LPUART_BAUD_OSR(25);
+		LPUART4->BAUD = LPUART_BAUD_SBR(14)|LPUART_BAUD_OSR(30);
         break;
     default:    //Default to 115200bps
-		LPUART4->BAUD = LPUART_BAUD_SBR(4)|LPUART_BAUD_OSR(25);
+		LPUART4->BAUD = LPUART_BAUD_SBR(14)|LPUART_BAUD_OSR(30);
         break;
     }
-    LPUART4->WATER = LPUART_WATER_RXWATER(0) | LPUART_WATER_TXWATER(1);
 
     /* Enable tx/rx FIFO */
+    /* The FIFO is only 8 words so this sends the first 8 words without delay.
+     * But after that, there's a delay for each character. */
 
+    LPUART4->WATER = LPUART_WATER_RXWATER(0) | LPUART_WATER_TXWATER(7);
     LPUART4->FIFO |= (LPUART_FIFO_TXFE_MASK | LPUART_FIFO_RXFE_MASK);
 
     /* Flush FIFO */
     LPUART4->FIFO |= (LPUART_FIFO_TXFLUSH_MASK | LPUART_FIFO_RXFLUSH_MASK);
 
-    LPUART4->CTRL |= LPUART_CTRL_TE_MASK|LPUART_CTRL_RE_MASK; //Enable RxD and TxD
+    /* Enable RxD and TxD */
+    LPUART4->CTRL |= LPUART_CTRL_TE_MASK|LPUART_CTRL_RE_MASK;
 
 }
 
@@ -103,12 +105,12 @@ INT8C BIOGetChar(void){
 
 /*******************************************************************************************
 * BIOWrite() - Sends an ASCII character
-*              Blocks as much as one character time
+*              Blocks as much as one character time after FIFO is full
 * MCU: MCXN947, LPUART4
 *    parameter: c is the ASCII character to be sent
 *******************************************************************************************/
 void BIOWrite(INT8C c){
-    while ((LPUART4->STAT & LPUART_STAT_TDRE_MASK)==0){} //waits until transmission
+    while ((LPUART4->STAT & LPUART_STAT_TDRE_MASK)==0){} //waits for space on FIFO
     LPUART4->DATA = (INT32U)c;
 }
 

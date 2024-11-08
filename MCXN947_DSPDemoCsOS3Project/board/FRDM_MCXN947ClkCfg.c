@@ -2,11 +2,10 @@
  * FRDM_MCXN947ClkCfg
  * This is a low level version of the clock initialization using only MCXN947_cm33_core0.h hardware abstraction layer.
  * Can ONLY be used at startup as it assumes reset values in all registers.
- * Will not work with clock config tools.
+ * Will not work with NXP clock config tools.
  * Sets main clock to 150MHz from a 24MHz XTAL.
  *
  * 24MHZ XTAL ---> PLL ---> AHB (main) clock 150MHz
- * Todo: Should pll_div setting go in ClkCfg? 150MHz/3 = 50MHz?
  *
  * TDM, 05/07/2024
  **********************************************************************************************************************/
@@ -72,5 +71,10 @@ void FRDM_MCXN947InitBootClock(void)
 
     /* Set SystemCoreClock variable */
     SystemCoreClock = BOARD_BOOTCLOCKPLL150M_CORE_CLOCK;
+	//Set pll_clk_div to pll0_clk/3 = 150MHz/3 = 50MHz
+    //This is default for FlexCOMM clocks
+	SYSCON->PLLCLKDIVSEL = SYSCON_PLLCLKDIVSEL_SEL(0);
+	SYSCON->PLLCLKDIV = SYSCON_PLLCLKDIV_DIV(2);
+
 }
 
