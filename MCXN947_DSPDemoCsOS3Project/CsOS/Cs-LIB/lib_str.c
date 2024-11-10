@@ -3534,8 +3534,8 @@ static  CPU_CHAR  *Str_FmtNbr_Int32 (CPU_INT32U    nbr,
                                                                 /* ... calc nbr digs to fmt & nbr lead chars.           */
             if (lead_char != (CPU_CHAR)'\0') {
                 nbr_dig_fmtd  = nbr_dig;
-                nbr_lead_char = nbr_dig     -
-                               (nbr_dig_min + nbr_neg_sign);
+                nbr_lead_char = (CPU_INT08U)(nbr_dig     -
+                               (nbr_dig_min + nbr_neg_sign));
             } else {
                 nbr_dig_fmtd  = nbr_dig_min + nbr_neg_sign;
                 nbr_lead_char = 0u;

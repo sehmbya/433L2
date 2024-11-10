@@ -62,7 +62,7 @@ extern  "C" {
 *********************************************************************************************************
 */
 
-#define  CPU_INT_SRC_POS_MAX                  ((((CPU_REG_ICTR & 0xF) + 1) * 32) + 16)
+#define  CPU_INT_SRC_POS_MAX                  (CPU_INT16U)((((CPU_REG_ICTR & 0xF) + 1) * 32) + 16)
 
 
 /*
@@ -181,31 +181,31 @@ void  CPU_IntSrcDis (CPU_INT08U  pos)
 
         case CPU_INT_MEM:                                       /* Memory management.                                   */
              CPU_CRITICAL_ENTER();
-             CPU_REG_SCB_SHCSR &= ~CPU_REG_SCB_SHCSR_MEMFAULTENA;
+             CPU_REG_SCB_SHCSR &= ~(CPU_INT32U)CPU_REG_SCB_SHCSR_MEMFAULTENA;
              CPU_CRITICAL_EXIT();
              break;
 
         case CPU_INT_BUSFAULT:                                  /* Bus fault.                                           */
              CPU_CRITICAL_ENTER();
-             CPU_REG_SCB_SHCSR &= ~CPU_REG_SCB_SHCSR_BUSFAULTENA;
+             CPU_REG_SCB_SHCSR &= ~(CPU_INT32U)CPU_REG_SCB_SHCSR_BUSFAULTENA;
              CPU_CRITICAL_EXIT();
              break;
 
         case CPU_INT_USAGEFAULT:                                /* Usage fault.                                         */
              CPU_CRITICAL_ENTER();
-             CPU_REG_SCB_SHCSR &= ~CPU_REG_SCB_SHCSR_USGFAULTENA;
+             CPU_REG_SCB_SHCSR &= ~(CPU_INT32U)CPU_REG_SCB_SHCSR_USGFAULTENA;
              CPU_CRITICAL_EXIT();
              break;
 
         case CPU_INT_SECUREFAULT:                               /* Secure fault.                                        */
              CPU_CRITICAL_ENTER();
-             CPU_REG_SCB_SHCSR &= ~CPU_REG_SCB_SHCSR_SECFAULTENA;
+             CPU_REG_SCB_SHCSR &= ~(CPU_INT32U)CPU_REG_SCB_SHCSR_SECFAULTENA;
              CPU_CRITICAL_EXIT();
              break;
 
         case CPU_INT_SYSTICK:                                   /* SysTick.                                             */
              CPU_CRITICAL_ENTER();
-             CPU_REG_SYST_CSR  &= ~CPU_REG_SYST_CSR_ENABLE;
+             CPU_REG_SYST_CSR  &= ~(CPU_INT32U)CPU_REG_SYST_CSR_ENABLE;
              CPU_CRITICAL_EXIT();
              break;
 
@@ -214,8 +214,8 @@ void  CPU_IntSrcDis (CPU_INT08U  pos)
         default:
              pos_max = CPU_INT_SRC_POS_MAX;
              if (pos < pos_max) {                               /* See Note #3.                                         */
-                 group = (pos - 16) / 32;
-                 nbr   = (pos - 16) % 32;
+                 group = (CPU_INT08U)(pos - 16) / 32;
+                 nbr   = (CPU_INT08U)(pos - 16) % 32;
 
                  CPU_CRITICAL_ENTER();
                  CPU_REG_NVIC_ICER(group) = DEF_BIT(nbr);       /* Disable interrupt.                                   */
@@ -305,8 +305,8 @@ void  CPU_IntSrcEn (CPU_INT08U  pos)
         default:
              pos_max = CPU_INT_SRC_POS_MAX;
              if (pos < pos_max) {                               /* See Note #3.                                         */
-                 group = (pos - 16) / 32;
-                 nbr   = (pos - 16) % 32;
+                 group = (CPU_INT08U)(pos - 16) / 32;
+                 nbr   = (CPU_INT08U)(pos - 16) % 32;
 
                  CPU_CRITICAL_ENTER();
                  CPU_REG_NVIC_ISER(group) = DEF_BIT(nbr);       /* Enable interrupt.                                    */
@@ -379,8 +379,8 @@ void  CPU_IntSrcPendClr (CPU_INT08U  pos)
         default:
              pos_max = CPU_INT_SRC_POS_MAX;
              if (pos < pos_max) {                               /* See Note #3.                                         */
-                 group = (pos - 16) / 32;
-                 nbr   = (pos - 16) % 32;
+                 group = (CPU_INT08U)(pos - 16) / 32;
+                 nbr   = (CPU_INT08U)(pos - 16) % 32;
 
                  CPU_CRITICAL_ENTER();
                  CPU_REG_NVIC_ICPR(group) = DEF_BIT(nbr);       /* Clear Pending interrupt.                             */
@@ -563,8 +563,8 @@ void  CPU_IntSrcPrioSet (CPU_INT08U  pos,
                  (void)type;
 #endif
 
-                 group                    = (pos - 16) / 4;
-                 nbr                      = (pos - 16) % 4;
+                 group                    = (CPU_INT08U)(pos - 16) / 4;
+                 nbr                      = (CPU_INT08U)(pos - 16) % 4;
 
                  CPU_CRITICAL_ENTER();
                  temp                     = CPU_REG_NVIC_IPR(group);
@@ -656,14 +656,14 @@ CPU_INT16S  CPU_IntSrcPrioGet (CPU_INT08U  pos)
         case CPU_INT_SECUREFAULT:                               /* Secure fault.                                        */
              CPU_CRITICAL_ENTER();
              temp = CPU_REG_SCB_SHPRI1;
-             prio = (temp >> (3 * DEF_OCTET_NBR_BITS)) & DEF_OCTET_MASK;
+             prio = (CPU_INT16S)(temp >> (3 * DEF_OCTET_NBR_BITS)) & DEF_OCTET_MASK;
              CPU_CRITICAL_EXIT();
              break;
 
         case CPU_INT_SVCALL:                                    /* SVCall.                                              */
              CPU_CRITICAL_ENTER();
              temp = CPU_REG_SCB_SHPRI2;
-             prio = (temp >> (3 * DEF_OCTET_NBR_BITS)) & DEF_OCTET_MASK;
+             prio = (CPU_INT16S)(temp >> (3 * DEF_OCTET_NBR_BITS)) & DEF_OCTET_MASK;
              CPU_CRITICAL_EXIT();
              break;
 
@@ -684,7 +684,7 @@ CPU_INT16S  CPU_IntSrcPrioGet (CPU_INT08U  pos)
         case CPU_INT_SYSTICK:                                   /* SysTick.                                             */
              CPU_CRITICAL_ENTER();
              temp = CPU_REG_SCB_SHPRI3;
-             prio = (temp >> (3 * DEF_OCTET_NBR_BITS)) & DEF_OCTET_MASK;
+             prio = (CPU_INT16S)(temp >> (3 * DEF_OCTET_NBR_BITS)) & DEF_OCTET_MASK;
              CPU_CRITICAL_EXIT();
              break;
 
@@ -693,8 +693,8 @@ CPU_INT16S  CPU_IntSrcPrioGet (CPU_INT08U  pos)
         default:
              pos_max = CPU_INT_SRC_POS_MAX;
              if (pos < pos_max) {                               /* See Note #3.                                         */
-                 group = (pos - 16) / 4;
-                 nbr   = (pos - 16) % 4;
+                 group = (CPU_INT08U)(pos - 16) / 4;
+                 nbr   = (CPU_INT08U)(pos - 16) % 4;
 
                  CPU_CRITICAL_ENTER();
                  temp  = CPU_REG_NVIC_IPR(group);               /* Read group interrupt priority.                       */

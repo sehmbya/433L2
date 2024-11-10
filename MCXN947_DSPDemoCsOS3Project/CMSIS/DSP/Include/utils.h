@@ -22,6 +22,13 @@
  * limitations under the License.
  */
 
+// This is added to supress conversion warnings. I thought it would be safer to add this
+// than editing all of the conversion warnings since it is not my code.
+// Todd Morton
+
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+
+
 #ifndef _ARM_MATH_UTILS_H_
 
 #define _ARM_MATH_UTILS_H_
@@ -55,7 +62,8 @@ extern "C"
   {
     q31_t out;
     uint32_t tempVal;
-    uint32_t index, i;
+    uint32_t index;
+    uint32_t i;
     uint32_t signBits;
 
     if (in > 0)
@@ -106,7 +114,8 @@ extern "C"
   {
     q15_t out = 0;
     uint32_t tempVal = 0;
-    uint32_t index = 0, i = 0;
+    uint32_t index = 0;
+    uint32_t i = 0;
     uint32_t signBits = 0;
 
     if (in > 0)
