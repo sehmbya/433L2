@@ -85,7 +85,7 @@ void  OS_MsgPoolInit (OS_ERR  *p_err)
     p_msg1 = OSCfg_MsgPoolBasePtr;
     p_msg2 = OSCfg_MsgPoolBasePtr;
     p_msg2++;
-    loops  = OSCfg_MsgPoolSize - 1u;
+    loops  = (OS_MSG_QTY)(OSCfg_MsgPoolSize - 1u);
     for (i = 0u; i < loops; i++) {                              /* Init. list of free OS_MSGs                           */
         p_msg1->NextPtr = p_msg2;
         p_msg1->MsgPtr  = (void *)0;

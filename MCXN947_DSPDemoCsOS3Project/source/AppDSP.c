@@ -100,7 +100,7 @@ void DSPSampleSizeSet(INT8U ssize){
 *******************************************************************************************/
 INT8U DSPSampleSizeGet(void){
 
-	INT32U ssize;
+	INT8U ssize;
 	ssize = CODECSampleSizeGet();
 	return ssize;
 

@@ -148,7 +148,7 @@ void  OSMemCreate (OS_MEM       *p_mem,
 
     p_link = (void **)p_addr;                                   /* Create linked list of free memory blocks             */
     p_blk  = (CPU_INT08U *)p_addr;
-    loops  = n_blks - 1u;
+    loops  = (OS_MEM_QTY)(n_blks - 1u);
     for (i = 0u; i < loops; i++) {
         p_blk +=  blk_size;
        *p_link = (void  *)p_blk;                                /* Save pointer to NEXT block in CURRENT block          */

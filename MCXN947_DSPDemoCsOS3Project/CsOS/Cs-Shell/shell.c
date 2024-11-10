@@ -827,7 +827,7 @@ static  void  Shell_ModuleCmdNameGet (CPU_CHAR    *cmd_str,
 
  
                                                                 /* --------------- COPY MODULE CMD NAME --------------- */
-    name_len = (pcmd - cmd_str);
+    name_len = (CPU_INT16U)(pcmd - cmd_str);
     if (name_len >= len) {                                      /* If module cmd name too long ...                      */
        *perr = SHELL_ERR_MODULE_CMD_NAME_TOO_LONG;              /* ... rtn with error.                                  */
         return;

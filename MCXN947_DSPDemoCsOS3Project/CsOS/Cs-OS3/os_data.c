@@ -1060,7 +1060,7 @@ void  OSDataPost (OS_DATA      *p_data,
             case OS_OPT_POST_LIFO:
                  if (p_data->Entries < p_data->MaxEntries) {    /* LIFO only if we have room                            */
                      if (p_data->OutIx == 0u) {
-                         p_data->OutIx = p_data->MaxEntries - 1u;
+                         p_data->OutIx = (OS_MSG_QTY)(p_data->MaxEntries - 1u);
                      } else {
                          p_data->OutIx--;
                      }
@@ -1097,7 +1097,7 @@ void  OSDataPost (OS_DATA      *p_data,
             default:
                  if (p_data->Entries > 0u) {
                      if (p_data->InIx == 0u) {
-                         p_data->InIx = p_data->MaxEntries - 1u;
+                         p_data->InIx = (OS_MSG_QTY)(p_data->MaxEntries - 1u);
                      } else {
                          p_data->InIx--;
                      }

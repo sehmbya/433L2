@@ -644,7 +644,7 @@ static  void  Terminal_HistoryNextGet (CPU_CHAR  *pstr)
 #if (TERMINAL_CFG_HISTORY_EN == DEF_ENABLED)
 static  void  Terminal_HistoryPut (CPU_CHAR  *pstr)
 {
-    CPU_INT16U  cmp_val;
+    CPU_INT16S  cmp_val;
 
 
     Terminal_HistoryShown   = DEF_NO;
@@ -754,7 +754,7 @@ static  CPU_INT16S  Terminal_fc (CPU_INT16U        argc,
 
                                                                 /* Calc nbr of items in history.                        */
     if (Terminal_HistoryIxLast >= Terminal_HistoryIxFirst) {
-        history_qty = Terminal_HistoryIxLast - Terminal_HistoryIxFirst + 1u;
+        history_qty = (CPU_INT16U)(Terminal_HistoryIxLast - Terminal_HistoryIxFirst + 1u);
     } else {
         history_qty = TERMINAL_CFG_HISTORY_ITEMS_NBR;
     }

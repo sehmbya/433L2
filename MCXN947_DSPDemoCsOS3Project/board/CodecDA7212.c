@@ -304,7 +304,7 @@ INT8U codecPLLset(INT32U samp_rate, INT32U sys_mclk) {
     CODECWriteRegister(REG_PLL_INTEGER, pll_integer);
 
     /* Enable PLL */
-    pll_ctrl = pll_ctrl & ~(0x3 << 2);
+    pll_ctrl = (INT8U)(pll_ctrl & ~(0x3 << 2));
     pll_ctrl |=  (PLL_EN | (indiv_bits<<2));
     CODECWriteRegister(REG_PLL_CTRL, pll_ctrl);
 
@@ -517,7 +517,7 @@ void CODECSampleSizeSet(INT8U ssize){
 	}
 	//change DAI data size, must be read-modify-write.
 	reg = CODECReadRegister(REG_DAI_CTRL);
-	reg = reg & ~0x0c; 						//clear size bits
+	reg = (INT8U)(reg & ~0x0c); 						//clear size bits
     reg = reg | (sizecode<<2);				//set size bits
 	CODECWriteRegister(REG_DAI_CTRL, reg);
 }
@@ -590,7 +590,7 @@ void CODECEnable(void){
 void CODECDisable(void){
 	INT8U reg;
 	reg = CODECReadRegister(REG_DAI_CTRL);
-    reg = reg & ~0x80;				//clear enable bit
+    reg = (INT8U)(reg & ~0x80);				//clear enable bit
 	CODECWriteRegister(REG_DAI_CTRL, reg);
 }
 
