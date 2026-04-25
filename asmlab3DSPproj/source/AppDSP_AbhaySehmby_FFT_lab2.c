@@ -28,8 +28,9 @@ static OS_SEM dspSuspended;
 //FFT magnitude output buffers/variables
 static q31_t fftResultLeft[DSP_SAMPLES_PER_BLOCK * 2];
 static q31_t fftResultRight[DSP_SAMPLES_PER_BLOCK * 2];
-//static q31_t fftMagResultLeft[DSP_SAMPLES_PER_BLOCK];
-//static q31_t fftMagResultRight[DSP_SAMPLES_PER_BLOCK];
+static q31_t fftMagResultLeft[DSP_SAMPLES_PER_BLOCK];
+static q31_t fftMagResultRight[DSP_SAMPLES_PER_BLOCK];
+static q31_t fftPeakFrequencyValue;
 
 //define FFT instances for left and right channels of buffer
 static arm_rfft_instance_q31 arm_rfft_instance_q31_left;
@@ -38,7 +39,7 @@ static arm_rfft_instance_q31 arm_rfft_instance_q31_right;
 /*******************************************************************************************
 * Defined Constants for Processing
 *******************************************************************************************/
-#define FFT_LENGTH  512
+#define FFT_LENGTH  2048
 //#define FREQ_BIN_SIZE   FFT_LENGTH / (SAMPLE RATE)
 
 /*******************************************************************************************
@@ -98,7 +99,9 @@ static void dspTask(void *p_arg){
 
     OS_ERR os_err;
     INT8U buffer_index;
-//    INT8U peak_freq_index; //index for peak frequency value
+
+    uint32_t peak_frequency_index; //index for peak frequency value
+    peak_frequency_index = 0; //for pointer safety and debugging initialize to 0
 
     // Initialize left and right real FFT instances
     FFTInit();
@@ -106,40 +109,42 @@ static void dspTask(void *p_arg){
 
     (void)p_arg;
     while(1){
-
+\
         DB0_TURN_OFF();          /* Turn off debug bit while waiting for ping-pong buffer */
         buffer_index = DMAInPend(0, &os_err);
         DB0_TURN_ON();
+
+        // The following code implements a pass through
+        dspOutBuffer[DSP_LEFT_CH][buffer_index] = dspInBuffer[DSP_LEFT_CH][buffer_index]; //Left Channel
+        dspOutBuffer[DSP_RIGHT_CH][buffer_index] = dspInBuffer[DSP_RIGHT_CH][buffer_index]; //Right Channel
 
         // DSP code goes here.
 
         //left channel FFT, magnitude, & peak frequencies
         arm_rfft_q31(&arm_rfft_instance_q31_left,
                 &dspInBuffer[DSP_LEFT_CH][buffer_index].samples[0],
-                &fftResultLeft[0]); //FFT
-//
-//        arm_cmplx_mag_q31(&fftResultLeft[0],
-//                        &fftMagResultLeft[0],
-//                        DSP_SAMPLES_PER_BLOCK);
+                &fftResultLeft[0]);
 
-//        arm_absmax_q31(&fftMagResultLeft[0],
-//                DSP_SAMPLES_PER_BLOCK,
-//                pResult,
-//                &peak_freq_index);
+        //magnitude
+        arm_cmplx_mag_q31(&fftResultLeft[0],
+                        &fftMagResultLeft[0],
+                        DSP_SAMPLES_PER_BLOCK);
 
-        //right channel FFT, magnitude, & peak frequencies
+        //peak frequency component
+        //only computing for the left channel
+        arm_absmax_q31(&fftMagResultLeft[0],
+                DSP_SAMPLES_PER_BLOCK,
+                &fftPeakFrequencyValue,
+                &peak_frequency_index);
+
+        //right channel FFT, magnitude
         arm_rfft_q31(&arm_rfft_instance_q31_right,
                 &dspInBuffer[DSP_RIGHT_CH][buffer_index].samples[0],
                 &fftResultRight[0]);
 
-//        arm_cmplx_mag_q31(&fftResultRight[0],
-//                &fftMagResultRight[0],
-//                DSP_SAMPLES_PER_BLOCK);
-
-        // The following code implements a pass through
-        dspOutBuffer[DSP_LEFT_CH][buffer_index] = dspInBuffer[DSP_LEFT_CH][buffer_index]; //Left Channel
-        dspOutBuffer[DSP_RIGHT_CH][buffer_index] = dspInBuffer[DSP_RIGHT_CH][buffer_index]; //Right Channel
-
+        arm_cmplx_mag_q31(&fftResultRight[0],
+                &fftMagResultRight[0],
+                DSP_SAMPLES_PER_BLOCK);
 
     }
 }
