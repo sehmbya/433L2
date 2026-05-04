@@ -32,6 +32,13 @@ static q31_t fftMagResultLeft[DSP_SAMPLES_PER_BLOCK];
 static q31_t fftMagResultRight[DSP_SAMPLES_PER_BLOCK];
 static q31_t fftPeakFrequencyValue;
 
+//TASK 4 DECLARATIONS
+//static float32_t cosOutputMessage[DSP_SAMPLES_PER_BLOCK]; //m(t)
+static float32_t cosOutputCarrier[DSP_SAMPLES_PER_BLOCK]; //s(t)
+//static float32_t amSignal; //x(t) = s(t)m(t)
+static float32_t amSignalOutputBuffer[DSP_SAMPLES_PER_BLOCK]; //x(t) = s(t)m(t)
+static float32_t dspInBufferF32[DSP_SAMPLES_PER_BLOCK];
+
 //define FFT instances for left and right channels of buffer
 static arm_rfft_instance_q31 arm_rfft_instance_q31_left;
 static arm_rfft_instance_q31 arm_rfft_instance_q31_right;
@@ -39,7 +46,8 @@ static arm_rfft_instance_q31 arm_rfft_instance_q31_right;
 /*******************************************************************************************
 * Defined Constants for Processing
 *******************************************************************************************/
-#define FFT_LENGTH  2048
+#define FFT_LENGTH  512
+#define CARRIER_FREQUENCY 15000 //1kHz
 //#define FREQ_BIN_SIZE   FFT_LENGTH / (SAMPLE RATE)
 
 /*******************************************************************************************
@@ -99,9 +107,13 @@ static void dspTask(void *p_arg){
 
     OS_ERR os_err;
     INT8U buffer_index;
+    INT32U i;
 
     uint32_t peak_frequency_index; //index for peak frequency value
     peak_frequency_index = 0; //for pointer safety and debugging initialize to 0
+
+    //task 4 declarations
+    const float32_t fs = 48000.0;
 
     // Initialize left and right real FFT instances
     FFTInit();
@@ -118,7 +130,33 @@ static void dspTask(void *p_arg){
         dspOutBuffer[DSP_LEFT_CH][buffer_index] = dspInBuffer[DSP_LEFT_CH][buffer_index]; //Left Channel
         dspOutBuffer[DSP_RIGHT_CH][buffer_index] = dspInBuffer[DSP_RIGHT_CH][buffer_index]; //Right Channel
 
+        //Convert to F32 format for task
+        arm_q31_to_float(&dspInBuffer[DSP_LEFT_CH][buffer_index].samples[0],
+                dspInBufferF32,
+                DSP_SAMPLES_PER_BLOCK);
+
+        //cosOutputMessage = dspInBufferF32;
         // DSP code goes here.
+        for(i = 0; i < DSP_SAMPLES_PER_BLOCK; i++){
+            //message signal m(t)
+            cosOutputCarrier[i] = arm_cos_f32(2 * PI * CARRIER_FREQUENCY * (float)i / fs); //carrier signal s(t) generation
+
+            //generate and store am signal --> x(t) = m(t) * s(t)
+            //amSignalOutputBuffer[i] = cosOutputMessage * cosOutputCarrier;
+        }
+        //generate and store am signal --> x(t) = m(t) * s(t)
+        arm_mult_f32(cosOutputCarrier,
+                dspInBufferF32,
+                amSignalOutputBuffer,
+                DSP_SAMPLES_PER_BLOCK);
+
+        //convert from float to q31 and write to output buffer task 4
+        arm_float_to_q31(amSignalOutputBuffer,
+                dspOutBuffer[DSP_LEFT_CH][buffer_index].samples,
+                DSP_SAMPLES_PER_BLOCK);
+        arm_float_to_q31(amSignalOutputBuffer,
+                dspOutBuffer[DSP_RIGHT_CH][buffer_index].samples,
+                DSP_SAMPLES_PER_BLOCK);
 
         //left channel FFT, magnitude, & peak frequencies
         arm_rfft_q31(&arm_rfft_instance_q31_left,
